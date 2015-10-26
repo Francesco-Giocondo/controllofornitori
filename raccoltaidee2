@@ -1,0 +1,46 @@
+#!/bin/bash mah
+
+
+row="$(wc --lines < file1 | egrep -o '[0-9]*')"
+
+echo Ecco le righe del file1: $row
+
+URL="http://www.svapoweb-pro.com/big-batteries-ecigarette/big-battery-kanger/kit-kanger-subox-nano-black"
+
+rm file3
+
+COUNTER=1
+RCOUNTER=2
+
+while [ $COUNTER -le $row ]; do
+
+   echo numero ciclo: $COUNTER
+
+   if [ "$COUNTER" != "1" ]; then
+      let "RCOUNTER=($COUNTER*2)"
+   else
+      echo
+   fi
+
+   URL=$( sed -n "$COUNTER"p file1 )
+
+   wget -qO- $URL | perl -l -0777 -ne 'print $1 if /<title.*?>\s*(.*?)\s*<\/title/si' >> file3
+
+   AVA=$( lynx -dump $URL | grep -i Availability )
+   CHECK=$( sed -n "$RCOUNTER"p file2 )
+
+   if [ "$CHECK" = "$AVA" ]; then
+      echo quantità invariata
+      lynx -dump $URL | grep -i Availability >> file3
+
+   else
+      echo ATTENZIONE! quantità diversa
+      lynx -dump $URL | grep -i Availability >> file3
+   fi
+
+   let COUNTER=COUNTER+1
+
+done
+
+
+cp file3 file2
